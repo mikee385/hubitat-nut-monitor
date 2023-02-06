@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.0.1" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -61,7 +61,6 @@ def refresh() {
     try {
 		telnetConnect([termChars:[10]], state.nutServerHost, state.nutServerPort.toInteger(), null, null)
 		sendCommand("GET VAR ${state.upsName} ups.status")
-		runIn(30, terminateConnection)
         
 	} catch (err) {
 	    telnetClose()
@@ -142,5 +141,6 @@ def telnetStatus(String message) {
 
 def sendCommand(cmd) {
 	logDebug("sendCommand: ${cmd}")
+	runIn(30, terminateConnection)
 	return sendHubCommand(new hubitat.device.HubAction("${cmd}", hubitat.device.Protocol.TELNET))
 }

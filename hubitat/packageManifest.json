@@ -3,7 +3,7 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Change message when powr is on mains",
+    "releaseNotes": "Attempt to fix a race condition for terminateConnection",
     "dateReleased": "2023-02-06",
     "apps": [
         {
@@ -21,7 +21,7 @@
         {
             "id": "42d49f27-0256-4bce-bb19-44970d42ed6a",
             "name": "NUT Monitor",
-            "version": "4.0.0",
+            "version": "4.0.1",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-nut-monitor/main/hubitat/nut-monitor-driver.groovy",
             "required": true
