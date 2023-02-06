@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.0" }
+String getVersionNum() { return "4.0.1" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -95,10 +95,10 @@ def initialize() {
 }
 
 def childDevice() {
-    def childID = "nutEventMonitor:" + app.getId()
+    def childID = "nutMonitor:" + app.getId()
     def child = getChildDevice(childID)
     if (!child) {
-        child = addChildDevice("mikee385", "NUT Event Monitor", childID, 1234, [label: upsName, isComponent: true])
+        child = addChildDevice("mikee385", "NUT Monitor", childID, 1234, [label: upsName, isComponent: true])
     }
     return child
 }
