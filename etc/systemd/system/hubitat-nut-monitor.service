@@ -1,0 +1,13 @@
+[Unit]
+Description=Service to send connect and disconnect messages to Hubitat when the UPSMON service starts and stops
+BindsTo=nut-monitor.service
+After=nut-monitor.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash /usr/local/bin/hubitat-nut-status.sh connected
+ExecStop=/bin/bash /usr/local/bin/hubitat-nut-status.sh disconnected
+
+[Install]
+WantedBy=multi-user.target

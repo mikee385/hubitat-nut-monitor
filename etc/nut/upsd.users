@@ -1,0 +1,12 @@
+[admin]
+    password = <password>
+    actions = SET
+    instcmds = ALL
+
+[upsmon]
+    password = <password>
+    upsmon master
+
+[hubitat]
+    password = <password>
+    hubitat slave
