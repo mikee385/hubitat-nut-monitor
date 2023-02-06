@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.3.0" }
+String getVersionNum() { return "4.4.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -80,6 +80,7 @@ def updated() {
 }
 
 def initialize() {
+    subscribe(location, "systemStart", systemStart)
     state.shuttingDown = false
     
     // Child Device
@@ -87,13 +88,15 @@ def initialize() {
     child.updateProperties(nutServerHost, nutServerPort, upsName)
     child.refresh()
     
-    subscribe(location, "systemStart", systemStart)
-
     // URLs
     if(!state.accessToken) {
         createAccessToken()
     }
     state.statusUrl = "${getFullLocalApiServerUrl()}/status/\$1?access_token=$state.accessToken"
+}
+
+def systemStart(evt) {
+    initialize()
 }
 
 def childDevice() {
@@ -103,10 +106,6 @@ def childDevice() {
         child = addChildDevice("mikee385", "NUT Monitor", childID, 1234, [label: upsName, isComponent: true])
     }
     return child
-}
-
-def systemStart(evt) {
-    initialize()
 }
 
 def connected() {
