@@ -6,9 +6,9 @@ After=nut-monitor.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStartPre=/bin/sleep 30
-ExecStart=/bin/bash /usr/local/bin/hubitat-nut-status.sh connected
-ExecStop=/bin/bash /usr/local/bin/hubitat-nut-status.sh disconnected
+ExecStartPre=-/bin/sleep 30
+ExecStart=-/bin/bash /usr/local/bin/hubitat-nut-status.sh connected
+ExecStop=-/bin/bash /usr/local/bin/hubitat-nut-status.sh disconnected
 
 [Install]
 WantedBy=multi-user.target
