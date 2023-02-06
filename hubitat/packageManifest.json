@@ -1,17 +1,17 @@
 {
-    "packageName": "NUT Event Monitor",
+    "packageName": "NUT Monitor",
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Streamline code in both app and driver",
+    "releaseNotes": "Rewrite for more streamlined code",
     "dateReleased": "2023-02-04",
     "apps": [
         {
             "id": "c79e2c5e-5b45-4271-b768-eb9749070b39",
-            "name": "NUT Event Monitor",
+            "name": "NUT Monitor",
             "version": "4.0.0",
             "namespace": "mikee385",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/apps/nut-event-monitor.groovy",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-nut-monitor/main/hubitat/nut-monitor-app.groovy",
             "required": true,
             "oauth": true,
             "primary": true
@@ -20,10 +20,10 @@
     "drivers": [
         {
             "id": "42d49f27-0256-4bce-bb19-44970d42ed6a",
-            "name": "NUT Event Monitor",
+            "name": "NUT Monitor",
             "version": "4.0.0",
             "namespace": "mikee385",
-            "location": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/drivers/nut-event-monitor.groovy",
+            "location": "https://raw.githubusercontent.com/mikee385/hubitat-nut-monitor/main/hubitat/nut-monitor-driver.groovy",
             "required": true
         }
     ]
