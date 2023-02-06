@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -48,7 +48,7 @@ preferences {
             input "alertShutdown", "bool", title: "Alert when UPS is shut down?", required: true, defaultValue: true
         }
         section {
-            input "personToNotify", "device.PersonStatus", title: "Person to Notify", multiple: false, required: true
+            input "personToNotify", "capability.notification", title: "Person to Notify", multiple: false, required: true
             input name: "enableDebugLog", type: "bool", title: "Enable debug logging?", defaultValue: false
             label title: "Assign a name", required: true
         }
