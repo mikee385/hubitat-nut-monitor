@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.4.0" }
+String getVersionNum() { return "4.5.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -41,11 +41,11 @@ preferences {
             input "shutdownWithUps", "bool", title: "Shutdown hub when UPS is shut down?", required: true, defaultValue: true
         }
         section("Alerts") {
-            input "alertConnected", "bool", title: "Alert when UPS is connected?", required: true, defaultValue: true
-            input "alertDisconnected", "bool", title: "Alert when UPS is disconnected?", required: true, defaultValue: true
-            input "alertMains", "bool", title: "Alert when UPS power is restored?", required: true, defaultValue: true
-            input "alertBattery", "bool", title: "Alert when UPS power is on battery?", required: true, defaultValue: true
-            input "alertShutdown", "bool", title: "Alert when UPS is shut down?", required: true, defaultValue: true
+            input "alertConnected", "bool", title: "Alert when UPS has connected?", required: true, defaultValue: true
+            input "alertDisconnected", "bool", title: "Alert when UPS has disconnected?", required: true, defaultValue: true
+            input "alertMains", "bool", title: "Alert when UPS is on mains power?", required: true, defaultValue: true
+            input "alertBattery", "bool", title: "Alert when UPS is on battery power?", required: true, defaultValue: true
+            input "alertShutdown", "bool", title: "Alert when UPS is shutting down?", required: true, defaultValue: true
         }
         section {
             input "personToNotify", "capability.notification", title: "Person to Notify", multiple: false, required: true
@@ -109,45 +109,55 @@ def childDevice() {
 }
 
 def connected() {
-    log.info "${upsName} has connected!"
+    def child = childDevice()
+    
+    log.info "${child} has connected!"
     if (alertConnected) {
-        personToNotify.deviceNotification("${upsName} has connected!")
+        personToNotify.deviceNotification("${child} has connected!")
     }
     
-    childDevice().refresh() 
+    child.refresh() 
 }
 
 def disconnected() {
-    log.info "${upsName} has disconnected!"
+    def child = childDevice()
+    
+    log.info "${child} has disconnected!"
     if (alertDisconnected) {
-        personToNotify.deviceNotification("${upsName} has disconnected!")
+        personToNotify.deviceNotification("${child} has disconnected!")
     }
     
-    childDevice().sendEvent(name: "powerSource", value: "unknown")
+    child.sendEvent(name: "powerSource", value: "unknown")
 }
 
 def mains() {
-    log.info "${upsName} power is on mains!"
+    def child = childDevice()
+    
+    log.info "${child} is on mains power!"
     if (alertMains) {
-        personToNotify.deviceNotification("${upsName} power is on mains!")
+        personToNotify.deviceNotification("${child} is on mains power!")
     }
     
-    childDevice().sendEvent(name: "powerSource", value: "mains")
+    child.sendEvent(name: "powerSource", value: "mains")
 }
 
 def battery() {
-    log.info "${upsName} is on battery!"
+    def child = childDevice()
+    
+    log.info "${child} is on battery power!"
     if (alertBattery) {
-        personToNotify.deviceNotification("${upsName} is on battery!")
+        personToNotify.deviceNotification("${child} is on battery power!")
     }
     
-    childDevice().sendEvent(name: "powerSource", value: "battery")
+    child.sendEvent(name: "powerSource", value: "battery")
 }
 
 def shutdown() {
-    log.warn "${upsName} is shutting down..."
+    def child = childDevice()
+    
+    log.warn "${child} is shutting down..."
     if (alertShutdown) {
-        personToNotify.deviceNotification("${upsName} is shutting down...")
+        personToNotify.deviceNotification("${child} is shutting down...")
     }
         
     if (!state.shuttingDown && shutdownWithUps) {
@@ -155,7 +165,7 @@ def shutdown() {
         runIn(15, shutdownHub)
     }
     
-    childDevice().sendEvent(name: "powerSource", value: "unknown")
+    child.sendEvent(name: "powerSource", value: "unknown")
 }
 
 def shutdownHub() {
