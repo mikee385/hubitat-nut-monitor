@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.1" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -122,9 +122,9 @@ def disconnected() {
 }
 
 def mains() {
-    log.info "${upsName} power has been restored!"
+    log.info "${upsName} power is on mains!"
     if (alertMains) {
-        personToNotify.deviceNotification("${upsName} power has been restored!")
+        personToNotify.deviceNotification("${upsName} power is on mains!")
     }
     
     childDevice().sendEvent(name: "powerSource", value: "mains")
