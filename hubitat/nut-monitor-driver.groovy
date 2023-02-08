@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.0.1" }
+String getVersionNum() { return "4.1.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -66,7 +66,7 @@ def refresh() {
 	    telnetClose()
 		
 		log.error "Refresh telnet connection error: ${err}"
-		parent.disconnected()
+		parent.unknown()
 	}
 }
 
@@ -74,7 +74,7 @@ def terminateConnection() {
     telnetClose()
     
     log.error "No response from telnet command"
-	parent.disconnected()
+	parent.unknown()
 }	
 
 def parse(String message) {
@@ -104,7 +104,7 @@ def parse(String message) {
         
         if (nocomm) {
             logDebug("parse: status is OFF")
-            parent.disconnected()
+            parent.unknown()
         } else if (fsd) {
             logDebug("parse: status is FSD")
             parent.shutdown()
@@ -116,11 +116,11 @@ def parse(String message) {
             parent.mains()
         } else {
             log.error "Unknown status: ${message}"
-            parent.disconnected()
+            parent.unknown()
         }
     } else {
         log.error "Unknown message: ${message}"
-        parent.disconnected()
+        parent.unknown()
     }
     
     telnetClose()
@@ -133,7 +133,7 @@ def telnetStatus(String message) {
         logDebug("telnetStatus: ${message}")
     } else {
         log.error "telnetStatus: ${message}"
-        parent.disconnected()
+        parent.unknown()
 	}
 	
 	telnetClose()

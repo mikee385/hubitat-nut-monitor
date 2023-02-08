@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.5.0" }
+String getVersionNum() { return "4.6.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 #include mikee385.debug-library
@@ -41,10 +41,9 @@ preferences {
             input "shutdownWithUps", "bool", title: "Shutdown hub when UPS is shut down?", required: true, defaultValue: true
         }
         section("Alerts") {
-            input "alertConnected", "bool", title: "Alert when UPS has connected?", required: true, defaultValue: true
-            input "alertDisconnected", "bool", title: "Alert when UPS has disconnected?", required: true, defaultValue: true
             input "alertMains", "bool", title: "Alert when UPS is on mains power?", required: true, defaultValue: true
             input "alertBattery", "bool", title: "Alert when UPS is on battery power?", required: true, defaultValue: true
+            input "alertUnknown", "bool", title: "Alert when UPS power is unknown?", required: true, defaultValue: true
             input "alertShutdown", "bool", title: "Alert when UPS is shutting down?", required: true, defaultValue: true
         }
         section {
@@ -108,26 +107,9 @@ def childDevice() {
     return child
 }
 
-def connected() {
+def refresh() {
     def child = childDevice()
-    
-    log.info "${child} has connected!"
-    if (alertConnected) {
-        personToNotify.deviceNotification("${child} has connected!")
-    }
-    
-    child.refresh() 
-}
-
-def disconnected() {
-    def child = childDevice()
-    
-    log.info "${child} has disconnected!"
-    if (alertDisconnected) {
-        personToNotify.deviceNotification("${child} has disconnected!")
-    }
-    
-    child.sendEvent(name: "powerSource", value: "unknown")
+    child.refresh()
 }
 
 def mains() {
@@ -150,6 +132,17 @@ def battery() {
     }
     
     child.sendEvent(name: "powerSource", value: "battery")
+}
+
+def unknown() {
+    def child = childDevice()
+    
+    log.info "${child} power is unknown!"
+    if (alertUnknown) {
+        personToNotify.deviceNotification("${child} power is unknown!")
+    }
+    
+    child.sendEvent(name: "powerSource", value: "unknown")
 }
 
 def shutdown() {
@@ -175,14 +168,14 @@ def shutdownHub() {
 def urlHandler_status() {
     logDebug("urlHandler_status: received ${params.status}")
     
-    if (params.status == "connected") {
-        connected()
-    } else if (params.status == "disconnected") {
-        disconnected()
+    if (params.status == "refresh") {
+        refresh()
     } else if (params.status == "mains") {
         mains()
     } else if (params.status == "battery") {
         battery()
+    } else if (params.status == "unknown") {
+        unknown()
     } else if (params.status == "shutdown") {
         shutdown()
     } else {
