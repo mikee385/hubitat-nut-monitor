@@ -14,10 +14,8 @@
  *
  */
  
-String getVersionNum() { return "4.6.0" }
+String getVersionNum() { return "4.7.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
-
-#include mikee385.debug-library
 
 definition(
     name: "NUT Monitor",
@@ -180,5 +178,11 @@ def urlHandler_status() {
         shutdown()
     } else {
         log.warn "Unknown status: ${params.status}"
+    }
+}
+
+def logDebug(msg) {
+    if (enableDebugLog) {
+        log.debug msg
     }
 }

@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Replace connected and disconnected with refresh and unknown",
-    "dateReleased": "2023-02-06",
+    "releaseNotes": "Remove reference to common library",
+    "dateReleased": "2023-04-03",
     "apps": [
         {
             "id": "c79e2c5e-5b45-4271-b768-eb9749070b39",
             "name": "NUT Monitor",
-            "version": "4.6.0",
+            "version": "4.7.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-nut-monitor/main/hubitat/nut-monitor-app.groovy",
             "required": true,
