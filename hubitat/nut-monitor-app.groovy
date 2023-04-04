@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.7.0" }
+String getVersionNum() { return "4.8.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -78,11 +78,11 @@ def updated() {
 
 def initialize() {
     subscribe(location, "systemStart", systemStart)
-    state.shuttingDown = false
     
     // Child Device
     def child = childDevice()
     child.updateProperties(nutServerHost, nutServerPort, upsName)
+    child.sendEvent(name: "shutdown", value: "inactive")
     child.refresh()
     
     // URLs
@@ -151,8 +151,8 @@ def shutdown() {
         personToNotify.deviceNotification("${child} is shutting down...")
     }
         
-    if (!state.shuttingDown && shutdownWithUps) {
-        state.shuttingDown = true
+    if (child.currentValue("shutdown") == "inactive" && shutdownWithUps) {
+        child.sendEvent(name: "shutdown", value: "active")
         runIn(15, shutdownHub)
     }
     

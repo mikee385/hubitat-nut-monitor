@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Remove reference to common library",
-    "dateReleased": "2023-04-03",
+    "releaseNotes": "Add attribute for shutdown",
+    "dateReleased": "2023-04-04",
     "apps": [
         {
             "id": "c79e2c5e-5b45-4271-b768-eb9749070b39",
             "name": "NUT Monitor",
-            "version": "4.7.0",
+            "version": "4.8.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-nut-monitor/main/hubitat/nut-monitor-app.groovy",
             "required": true,
@@ -21,7 +21,7 @@
         {
             "id": "42d49f27-0256-4bce-bb19-44970d42ed6a",
             "name": "NUT Monitor",
-            "version": "4.1.0",
+            "version": "4.2.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-nut-monitor/main/hubitat/nut-monitor-driver.groovy",
             "required": true

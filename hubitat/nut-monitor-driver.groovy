@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.1.0" }
+String getVersionNum() { return "4.2.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -28,6 +28,8 @@ String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${
         capability "Refresh"
         capability "Sensor"
         capability "Telnet"
+        
+        attribute "shutdown", "enum", ["active", "inactive"]
     }
     preferences {
         input name: "logEnable", type: "bool", title: "Enable debug logging?", defaultValue: false, displayDuringSetup: true
@@ -38,6 +40,7 @@ def installed() {
     logDebug("installed")
     
     sendEvent(name: "powerSource", value: "unknown")
+    sendEvent(name: "shutdown", value: "inactive")
 }
 
 def logDebug(msg) {
