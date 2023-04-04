@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.8.0" }
+String getVersionNum() { return "4.9.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -31,9 +31,13 @@ definition(
 preferences {
     page(name: "settings", title: "NUT Monitor", install: true, uninstall: true) {
         section {
-            input name: "nutServerHost", type: "string", description: "IP or hostname of NUT server", title: "NUT server hostname", required: true
-            input name: "nutServerPort", type: "number", description: "Port number of NUT server", title: "NUT server port number", required: true, defaultValue: 3493, range: "1..65535"
+            input name: "nutServerHost", type: "string", title: "NUT server hostname", description: "IP or hostname of NUT server", required: true
+            input name: "nutServerPort", type: "number", title: "NUT server port number", description: "Port number of NUT server", required: true, defaultValue: 3493, range: "1..65535"
             input name: "upsName", type: "string", title: "UPS Name:", required: true
+        }
+        section("Hub Security") {
+            input "hubitatUsername", "string", title: "Hubitat Username", description: "(blank if none)", required: false
+	        input "hubitatPassword", "password", title: "Hubitat Password", description: "(blank if none)", required: false
         }
         section("Shutdown Hub") {
             input "shutdownWithUps", "bool", title: "Shutdown hub when UPS is shut down?", required: true, defaultValue: true
@@ -159,8 +163,41 @@ def shutdown() {
     child.sendEvent(name: "powerSource", value: "unknown")
 }
 
+def getLoginCookie() {
+    def cookie = ""
+    
+    if (hubitatUsername && hubitatPassword) {
+        httpPost([
+            uri: "http://127.0.0.1:8080",
+            path: "/login",
+            query: [
+                loginRedirect: "/"
+            ],
+            body: [
+                username: hubitatUsername,
+                password: hubitatPassword,
+                submit: "Login"
+            ]
+        ]) { 
+            resp -> cookie = resp?.headers?.'Set-Cookie'?.split(';')?.getAt(0)
+        }
+    }
+    
+    return cookie
+}
+
 def shutdownHub() {
-    httpPost("http://127.0.0.1:8080/hub/shutdown", "") { resp -> }
+    def cookie = getLoginCookie()
+    
+    httpPost([
+        uri: "http://127.0.0.1:8080",
+        path: "/hub/shutdown",
+        headers: [
+			"Cookie": cookie
+        ]
+    ]) {
+		resp -> 
+	}
 }
 
 def urlHandler_status() {
