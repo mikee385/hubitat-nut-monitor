@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.9.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -42,7 +42,12 @@ preferences {
         section("Shutdown Hub") {
             input "shutdownWithUps", "bool", title: "Shutdown hub when UPS is shut down?", required: true, defaultValue: true
         }
+        section("Offline") {
+            input "offlineDuration", "number", title: "Minimum time before offline (in minutes)", required: true, defaultValue: 2
+        }
         section("Alerts") {
+            input "alertStarted", "bool", title: "Alert when NUT Monitor is started?", required: true, defaultValue: true
+            input "alertStopped", "bool", title: "Alert when NUT Monitor is stopped?", required: true, defaultValue: true
             input "alertMains", "bool", title: "Alert when UPS is on mains power?", required: true, defaultValue: true
             input "alertBattery", "bool", title: "Alert when UPS is on battery power?", required: true, defaultValue: true
             input "alertUnknown", "bool", title: "Alert when UPS power is unknown?", required: true, defaultValue: true
@@ -107,6 +112,29 @@ def childDevice() {
         child = addChildDevice("mikee385", "NUT Monitor", childID, 1234, [label: upsName, isComponent: true])
     }
     return child
+}
+
+def start() {
+    log.info "NUT Monitor has been started!"
+    if (alertStarted) {
+        personToNotify.deviceNotification("NUT Monitor has been started!")
+    }
+    
+    unschedule("offline")
+    refresh()
+}
+
+def stop() {
+    log.info "NUT Monitor has been stopped..."
+    if (alertStopped) {
+        personToNotify.deviceNotification("NUT Monitor has been stopped...")
+    }
+    
+    runIn(60*offlineDuration, offline)
+}
+
+def offline() {
+    unknown()
 }
 
 def refresh() {
@@ -203,7 +231,11 @@ def shutdownHub() {
 def urlHandler_status() {
     logDebug("urlHandler_status: received ${params.status}")
     
-    if (params.status == "refresh") {
+    if (params.status == "start") {
+        start()
+    } else if (params.status == "stop") {
+        stop()
+    } else if (params.status == "refresh") {
         refresh()
     } else if (params.status == "mains") {
         mains()

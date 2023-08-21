@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "4.2.0" }
+String getVersionNum() { return "5.0.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
