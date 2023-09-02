@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -90,6 +90,12 @@ def initialize() {
     
     // Child Device
     def child = childDevice()
+    
+    subscribe(child, "powerSource.mains", mains)
+    subscribe(child, "powerSource.battery", battery)
+    subscribe(child, "powerSource.unknown", unknown)
+    subscribe(child, "shutdown.active", shutdown)
+    
     child.updateProperties(nutServerHost, nutServerPort, upsName)
     child.sendEvent(name: "shutdown", value: "inactive")
     child.refresh()
@@ -134,7 +140,8 @@ def stop() {
 }
 
 def offline() {
-    unknown()
+    def child = childDevice()
+    child.sendEvent(name: "powerSource", value: "unknown")
 }
 
 def refresh() {
@@ -149,8 +156,6 @@ def mains() {
     if (alertMains) {
         personToNotify.deviceNotification("${child} is on mains power!")
     }
-    
-    child.sendEvent(name: "powerSource", value: "mains")
 }
 
 def battery() {
@@ -160,8 +165,6 @@ def battery() {
     if (alertBattery) {
         personToNotify.deviceNotification("${child} is on battery power!")
     }
-    
-    child.sendEvent(name: "powerSource", value: "battery")
 }
 
 def unknown() {
@@ -171,8 +174,6 @@ def unknown() {
     if (alertUnknown) {
         personToNotify.deviceNotification("${child} power is unknown!")
     }
-    
-    child.sendEvent(name: "powerSource", value: "unknown")
 }
 
 def shutdown() {
@@ -183,8 +184,7 @@ def shutdown() {
         personToNotify.deviceNotification("${child} is shutting down...")
     }
         
-    if (child.currentValue("shutdown") == "inactive" && shutdownWithUps) {
-        child.sendEvent(name: "shutdown", value: "active")
+    if (shutdownWithUps) {
         runIn(15, shutdownHub)
     }
     
@@ -231,6 +231,8 @@ def shutdownHub() {
 def urlHandler_status() {
     logDebug("urlHandler_status: received ${params.status}")
     
+    def child = childDevice()
+    
     if (params.status == "start") {
         start()
     } else if (params.status == "stop") {
@@ -238,13 +240,13 @@ def urlHandler_status() {
     } else if (params.status == "refresh") {
         refresh()
     } else if (params.status == "mains") {
-        mains()
+        child.sendEvent(name: "powerSource", value: "mains")
     } else if (params.status == "battery") {
-        battery()
+        child.sendEvent(name: "powerSource", value: "battery")
     } else if (params.status == "unknown") {
-        unknown()
+        child.sendEvent(name: "powerSource", value: "unknown")
     } else if (params.status == "shutdown") {
-        shutdown()
+        child.sendEvent(name: "shutdown", value: "active") 
     } else {
         log.warn "Unknown status: ${params.status}"
     }

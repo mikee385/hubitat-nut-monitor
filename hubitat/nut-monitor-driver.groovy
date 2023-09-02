@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "5.0.0" }
+String getVersionNum() { return "6.0.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -69,7 +69,7 @@ def refresh() {
 	    telnetClose()
 		
 		log.error "Refresh telnet connection error: ${err}"
-		parent.unknown()
+		sendEvent(name: "powerSource", value: "unknown")
 	}
 }
 
@@ -77,7 +77,7 @@ def terminateConnection() {
     telnetClose()
     
     log.error "No response from telnet command"
-	parent.unknown()
+	sendEvent(name: "powerSource", value: "unknown")
 }	
 
 def parse(String message) {
@@ -107,23 +107,23 @@ def parse(String message) {
         
         if (nocomm) {
             logDebug("parse: status is OFF")
-            parent.unknown()
+            sendEvent(name: "powerSource", value: "unknown")
         } else if (fsd) {
             logDebug("parse: status is FSD")
-            parent.shutdown()
+            sendEvent(name: "shutdown", value: "active")
         } else if (onbatt) {
             logDebug("parse: status is OB")
-            parent.battery()
+            sendEvent(name: "powerSource", value: "battery")
         } else if (online) {
             logDebug("parse: status is OL")
-            parent.mains()
+            sendEvent(name: "powerSource", value: "mains")
         } else {
             log.error "Unknown status: ${message}"
-            parent.unknown()
+            sendEvent(name: "powerSource", value: "unknown")
         }
     } else {
         log.error "Unknown message: ${message}"
-        parent.unknown()
+        sendEvent(name: "powerSource", value: "unknown")
     }
     
     telnetClose()
@@ -136,7 +136,7 @@ def telnetStatus(String message) {
         logDebug("telnetStatus: ${message}")
     } else {
         log.error "telnetStatus: ${message}"
-        parent.unknown()
+        sendEvent(name: "powerSource", value: "unknown")
 	}
 	
 	telnetClose()
