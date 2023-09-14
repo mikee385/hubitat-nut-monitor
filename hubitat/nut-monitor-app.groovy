@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "6.0.1" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -149,7 +149,7 @@ def refresh() {
     child.refresh()
 }
 
-def mains() {
+def mains(evt) {
     def child = childDevice()
     
     log.info "${child} is on mains power!"
@@ -158,7 +158,7 @@ def mains() {
     }
 }
 
-def battery() {
+def battery(evt) {
     def child = childDevice()
     
     log.info "${child} is on battery power!"
@@ -167,7 +167,7 @@ def battery() {
     }
 }
 
-def unknown() {
+def unknown(evt) {
     def child = childDevice()
     
     log.info "${child} power is unknown!"
@@ -176,7 +176,7 @@ def unknown() {
     }
 }
 
-def shutdown() {
+def shutdown(evt) {
     def child = childDevice()
     
     log.warn "${child} is shutting down..."
