@@ -216,7 +216,7 @@ def batteryReplace(evt) {
     
     log.info "${child} battery needs to be replaced!"
     if (alertBatteryReplace) {
-        personToNotify.deviceNotification("${child} battery needs to be replaced!"
+        personToNotify.deviceNotification("${child} battery needs to be replaced!")
     }
 }
 
