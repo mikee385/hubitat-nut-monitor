@@ -1,7 +1,7 @@
 /**
  *  NUT Monitor Driver
  *
- *  Copyright 2023 Michael Pierce
+ *  Copyright 2024 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.0" }
+String getVersionNum() { return "7.0.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -29,6 +29,7 @@ String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${
         capability "Sensor"
         capability "Telnet"
         
+        attribute "battery", "enum", ["good", "low", "replace", "unknown"]
         attribute "shutdown", "enum", ["active", "inactive"]
     }
     preferences {
@@ -40,6 +41,7 @@ def installed() {
     logDebug("installed")
     
     sendEvent(name: "powerSource", value: "unknown")
+    sendEvent(name: "battery", value: "unknown")
     sendEvent(name: "shutdown", value: "inactive")
 }
 
@@ -70,6 +72,7 @@ def refresh() {
 		
 		log.error "Refresh telnet connection error: ${err}"
 		sendEvent(name: "powerSource", value: "unknown")
+		sendEvent(name: "battery", value: "unknown")
 	}
 }
 
@@ -78,6 +81,7 @@ def terminateConnection() {
     
     log.error "No response from telnet command"
 	sendEvent(name: "powerSource", value: "unknown")
+	sendEvent(name: "battery", value: "unknown")
 }	
 
 def parse(String message) {
@@ -89,6 +93,8 @@ def parse(String message) {
     def onbatt = false
     def fsd = false
     def nocomm = false
+    def lowbatt = false
+    def replbatt = false
     
     def values = message.split(" ")
     if (values[0] == "VAR" && values[1] == state.upsName && values[2] == "ups.status") {
@@ -102,28 +108,49 @@ def parse(String message) {
                 fsd = true
             } else if (status == "OFF") {
                 nocomm = true
+            } else if (status == "LB") {
+                lowbatt = true
+            } else if (status == "RB") {
+                replbatt = true
             }
+        }
+        
+        if (fsd) {
+            logDebug("parse: status is FSD")
+            sendEvent(name: "shutdown", value: "active")
         }
         
         if (nocomm) {
             logDebug("parse: status is OFF")
             sendEvent(name: "powerSource", value: "unknown")
-        } else if (fsd) {
-            logDebug("parse: status is FSD")
-            sendEvent(name: "shutdown", value: "active")
-        } else if (onbatt) {
-            logDebug("parse: status is OB")
-            sendEvent(name: "powerSource", value: "battery")
-        } else if (online) {
-            logDebug("parse: status is OL")
-            sendEvent(name: "powerSource", value: "mains")
+            sendEvent(name: "battery", value: "unknown")
         } else {
-            log.error "Unknown status: ${message}"
-            sendEvent(name: "powerSource", value: "unknown")
-        }
+            if (onbatt) {
+                logDebug("parse: power status is OB")
+                sendEvent(name: "powerSource", value: "battery")
+            } else if (online) {
+                logDebug("parse: power status is OL")
+                sendEvent(name: "powerSource", value: "mains")
+            } else {
+                log.error "Unknown power status: ${message}"
+                sendEvent(name: "powerSource", value: "unknown")
+            }
+            
+            if (lowbatt) {
+                logDebug("parse: battery status is LB")
+                sendEvent(name: "battery", value: "low")
+            } else if (replbatt) {
+                logDebug("parse: battery status is RB")
+                sendEvent(name: "battery", value: "replace")
+            } else {
+                logDebug("parse: no battery status, assuming good")
+                sendEvent(name: "battery", value: "good")
+            }
+        } 
     } else {
         log.error "Unknown message: ${message}"
         sendEvent(name: "powerSource", value: "unknown")
+        sendEvent(name: "battery", value: "unknown")
     }
     
     telnetClose()
@@ -137,6 +164,7 @@ def telnetStatus(String message) {
     } else {
         log.error "telnetStatus: ${message}"
         sendEvent(name: "powerSource", value: "unknown")
+        sendEvent(name: "battery", value: "unknown")
 	}
 	
 	telnetClose()

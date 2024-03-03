@@ -1,7 +1,7 @@
 /**
  *  NUT Monitor App
  *
- *  Copyright 2023 Michael Pierce
+ *  Copyright 2024 Michael Pierce
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "6.0.1" }
+String getVersionNum() { return "7.0.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -45,13 +45,23 @@ preferences {
         section("Offline") {
             input "offlineDuration", "number", title: "Minimum time before offline (in minutes)", required: true, defaultValue: 2
         }
-        section("Alerts") {
-            input "alertStarted", "bool", title: "Alert when NUT Monitor is started?", required: true, defaultValue: true
-            input "alertStopped", "bool", title: "Alert when NUT Monitor is stopped?", required: true, defaultValue: true
-            input "alertMains", "bool", title: "Alert when UPS is on mains power?", required: true, defaultValue: true
-            input "alertBattery", "bool", title: "Alert when UPS is on battery power?", required: true, defaultValue: true
-            input "alertUnknown", "bool", title: "Alert when UPS power is unknown?", required: true, defaultValue: true
+        section("Monitor Alerts") {
+            input "alertNUTStarted", "bool", title: "Alert when NUT Monitor is started?", required: true, defaultValue: true
+            input "alertNUTStopped", "bool", title: "Alert when NUT Monitor is stopped?", required: true, defaultValue: true
+        }
+        section("Shutdown Alerts") {
             input "alertShutdown", "bool", title: "Alert when UPS is shutting down?", required: true, defaultValue: true
+        }
+        section("Power Alerts") {
+            input "alertPowerMains", "bool", title: "Alert when UPS is on mains power?", required: true, defaultValue: true
+            input "alertPowerBattery", "bool", title: "Alert when UPS is on battery power?", required: true, defaultValue: true
+            input "alertPowerUnknown", "bool", title: "Alert when UPS power is unknown?", required: true, defaultValue: true
+        }
+        section("Battery Alerts") {
+            input "alertBatteryGood", "bool", title: "Alert when UPS battery is good?", required: true, defaultValue: true
+            input "alertBatteryLow", "bool", title: "Alert when UPS battery is low?", required: true, defaultValue: true
+            input "alertBatteryReplace", "bool", title: "Alert when UPS battery needs to be replaced?", required: true, defaultValue: true
+            input "alertBatteryUnknown", "bool", title: "Alert when UPS battery is unknown?", required: true, defaultValue: true
         }
         section {
             input "personToNotify", "capability.notification", title: "Person to Notify", multiple: false, required: true
@@ -91,9 +101,15 @@ def initialize() {
     // Child Device
     def child = childDevice()
     
-    subscribe(child, "powerSource.mains", mains)
-    subscribe(child, "powerSource.battery", battery)
-    subscribe(child, "powerSource.unknown", unknown)
+    subscribe(child, "powerSource.mains", powerMains)
+    subscribe(child, "powerSource.battery", powerBattery)
+    subscribe(child, "powerSource.unknown", powerUnknown)
+    
+    subscribe(child, "battery.good", batteryGood)
+    subscribe(child, "battery.low", batteryLow)
+    subscribe(child, "battery.replace", batteryReplace)
+    subscribe(child, "battery.unknown", batteryUnknown)
+    
     subscribe(child, "shutdown.active", shutdown)
     
     child.updateProperties(nutServerHost, nutServerPort, upsName)
@@ -122,7 +138,7 @@ def childDevice() {
 
 def start() {
     log.info "NUT Monitor has been started!"
-    if (alertStarted) {
+    if (alertNUTStarted) {
         personToNotify.deviceNotification("NUT Monitor has been started!")
     }
     
@@ -132,7 +148,7 @@ def start() {
 
 def stop() {
     log.info "NUT Monitor has been stopped..."
-    if (alertStopped) {
+    if (alertNUTStopped) {
         personToNotify.deviceNotification("NUT Monitor has been stopped...")
     }
     
@@ -142,6 +158,7 @@ def stop() {
 def offline() {
     def child = childDevice()
     child.sendEvent(name: "powerSource", value: "unknown")
+    child.sendEvent(name: "battery", value: "unknown")
 }
 
 def refresh() {
@@ -149,30 +166,66 @@ def refresh() {
     child.refresh()
 }
 
-def mains(evt) {
+def powerMains(evt) {
     def child = childDevice()
     
     log.info "${child} is on mains power!"
-    if (alertMains) {
+    if (alertPowerMains) {
         personToNotify.deviceNotification("${child} is on mains power!")
     }
 }
 
-def battery(evt) {
+def powerBattery(evt) {
     def child = childDevice()
     
     log.info "${child} is on battery power!"
-    if (alertBattery) {
+    if (alertPowerBattery) {
         personToNotify.deviceNotification("${child} is on battery power!")
     }
 }
 
-def unknown(evt) {
+def powerUnknown(evt) {
     def child = childDevice()
     
     log.info "${child} power is unknown!"
-    if (alertUnknown) {
+    if (alertPowerUnknown) {
         personToNotify.deviceNotification("${child} power is unknown!")
+    }
+}
+
+def batteryGood(evt) {
+    def child = childDevice()
+    
+    log.info "${child} battery is good!"
+    if (alertBatteryGood) {
+        personToNotify.deviceNotification("${child} battery is good!")
+    }
+}
+
+def batteryLow(evt) {
+    def child = childDevice()
+    
+    log.info "${child} battery is low!"
+    if (alertBatteryLow) {
+        personToNotify.deviceNotification("${child} battery is low!")
+    }
+}
+
+def batteryReplace(evt) {
+    def child = childDevice()
+    
+    log.info "${child} battery needs to be replaced!"
+    if (alertBatteryReplace) {
+        personToNotify.deviceNotification("${child} battery needs to be replaced!"
+    }
+}
+
+def batteryUnknown(evt) {
+    def child = childDevice()
+    
+    log.info "${child} battery is unknown!"
+    if (alertBatteryUnknown) {
+        personToNotify.deviceNotification("${child} battery is unknown!")
     }
 }
 
@@ -189,6 +242,7 @@ def shutdown(evt) {
     }
     
     child.sendEvent(name: "powerSource", value: "unknown")
+    child.sendEvent(name: "battery", value: "unknown")
 }
 
 def getLoginCookie() {
@@ -243,8 +297,13 @@ def urlHandler_status() {
         child.sendEvent(name: "powerSource", value: "mains")
     } else if (params.status == "battery") {
         child.sendEvent(name: "powerSource", value: "battery")
+    } else if (params.status == "low") {
+        child.sendEvent(name: "battery", value: "low")
+    } else if (params.status == "replace") {
+        child.sendEvent(name: "battery", value: "replace")
     } else if (params.status == "unknown") {
         child.sendEvent(name: "powerSource", value: "unknown")
+        child.sendEvent(name: "battery", value: "unknown")
     } else if (params.status == "shutdown") {
         child.sendEvent(name: "shutdown", value: "active") 
     } else {

@@ -3,13 +3,13 @@
     "author": "Michael Pierce",
     "minimumHEVersion": "2.2.8",
     "licenseFile": "https://raw.githubusercontent.com/mikee385/hubitat-mikee385/master/LICENSE",
-    "releaseNotes": "Fix missing argument in callbacks",
-    "dateReleased": "2023-09-14",
+    "releaseNotes": "Add alerts for low battery and replace battery",
+    "dateReleased": "2024-03-03",
     "apps": [
         {
             "id": "c79e2c5e-5b45-4271-b768-eb9749070b39",
             "name": "NUT Monitor",
-            "version": "6.0.1",
+            "version": "7.0.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-nut-monitor/main/hubitat/nut-monitor-app.groovy",
             "required": true,
@@ -21,7 +21,7 @@
         {
             "id": "42d49f27-0256-4bce-bb19-44970d42ed6a",
             "name": "NUT Monitor",
-            "version": "6.0.0",
+            "version": "7.0.0",
             "namespace": "mikee385",
             "location": "https://raw.githubusercontent.com/mikee385/hubitat-nut-monitor/main/hubitat/nut-monitor-driver.groovy",
             "required": true
