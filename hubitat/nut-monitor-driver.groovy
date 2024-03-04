@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.1.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
  metadata {
@@ -29,7 +29,7 @@ String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${
         capability "Sensor"
         capability "Telnet"
         
-        attribute "battery", "enum", ["good", "low", "replace", "unknown"]
+        attribute "batteryStatus", "enum", ["normal", "low", "replace", "unknown"]
         attribute "shutdown", "enum", ["active", "inactive"]
     }
     preferences {
@@ -41,7 +41,7 @@ def installed() {
     logDebug("installed")
     
     sendEvent(name: "powerSource", value: "unknown")
-    sendEvent(name: "battery", value: "unknown")
+    sendEvent(name: "batteryStatus", value: "unknown")
     sendEvent(name: "shutdown", value: "inactive")
 }
 
@@ -72,7 +72,7 @@ def refresh() {
 		
 		log.error "Refresh telnet connection error: ${err}"
 		sendEvent(name: "powerSource", value: "unknown")
-		sendEvent(name: "battery", value: "unknown")
+		sendEvent(name: "batteryStatus", value: "unknown")
 	}
 }
 
@@ -81,7 +81,7 @@ def terminateConnection() {
     
     log.error "No response from telnet command"
 	sendEvent(name: "powerSource", value: "unknown")
-	sendEvent(name: "battery", value: "unknown")
+	sendEvent(name: "batteryStatus", value: "unknown")
 }	
 
 def parse(String message) {
@@ -123,7 +123,7 @@ def parse(String message) {
         if (nocomm) {
             logDebug("parse: status is OFF")
             sendEvent(name: "powerSource", value: "unknown")
-            sendEvent(name: "battery", value: "unknown")
+            sendEvent(name: "batteryStatus", value: "unknown")
         } else {
             if (onbatt) {
                 logDebug("parse: power status is OB")
@@ -138,19 +138,19 @@ def parse(String message) {
             
             if (lowbatt) {
                 logDebug("parse: battery status is LB")
-                sendEvent(name: "battery", value: "low")
+                sendEvent(name: "batteryStatus", value: "low")
             } else if (replbatt) {
                 logDebug("parse: battery status is RB")
-                sendEvent(name: "battery", value: "replace")
+                sendEvent(name: "batteryStatus", value: "replace")
             } else {
-                logDebug("parse: no battery status, assuming good")
-                sendEvent(name: "battery", value: "good")
+                logDebug("parse: no battery status, assuming normal")
+                sendEvent(name: "batteryStatus", value: "normal")
             }
         } 
     } else {
         log.error "Unknown message: ${message}"
         sendEvent(name: "powerSource", value: "unknown")
-        sendEvent(name: "battery", value: "unknown")
+        sendEvent(name: "batteryStatus", value: "unknown")
     }
     
     telnetClose()
@@ -164,7 +164,7 @@ def telnetStatus(String message) {
     } else {
         log.error "telnetStatus: ${message}"
         sendEvent(name: "powerSource", value: "unknown")
-        sendEvent(name: "battery", value: "unknown")
+        sendEvent(name: "batteryStatus", value: "unknown")
 	}
 	
 	telnetClose()

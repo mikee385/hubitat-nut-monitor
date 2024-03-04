@@ -14,7 +14,7 @@
  *
  */
  
-String getVersionNum() { return "7.0.0" }
+String getVersionNum() { return "7.1.0" }
 String getVersionLabel() { return "NUT Monitor, version ${getVersionNum()} on ${getPlatform()}" }
 
 definition(
@@ -58,7 +58,7 @@ preferences {
             input "alertPowerUnknown", "bool", title: "Alert when UPS power is unknown?", required: true, defaultValue: true
         }
         section("Battery Alerts") {
-            input "alertBatteryGood", "bool", title: "Alert when UPS battery is good?", required: true, defaultValue: true
+            input "alertBatteryNormal", "bool", title: "Alert when UPS battery is normal?", required: true, defaultValue: true
             input "alertBatteryLow", "bool", title: "Alert when UPS battery is low?", required: true, defaultValue: true
             input "alertBatteryReplace", "bool", title: "Alert when UPS battery needs to be replaced?", required: true, defaultValue: true
             input "alertBatteryUnknown", "bool", title: "Alert when UPS battery is unknown?", required: true, defaultValue: true
@@ -105,10 +105,10 @@ def initialize() {
     subscribe(child, "powerSource.battery", powerBattery)
     subscribe(child, "powerSource.unknown", powerUnknown)
     
-    subscribe(child, "battery.good", batteryGood)
-    subscribe(child, "battery.low", batteryLow)
-    subscribe(child, "battery.replace", batteryReplace)
-    subscribe(child, "battery.unknown", batteryUnknown)
+    subscribe(child, "batteryStatus.normal", batteryNormal)
+    subscribe(child, "batteryStatus.low", batteryLow)
+    subscribe(child, "batteryStatus.replace", batteryReplace)
+    subscribe(child, "batteryStatus.unknown", batteryUnknown)
     
     subscribe(child, "shutdown.active", shutdown)
     
@@ -158,7 +158,7 @@ def stop() {
 def offline() {
     def child = childDevice()
     child.sendEvent(name: "powerSource", value: "unknown")
-    child.sendEvent(name: "battery", value: "unknown")
+    child.sendEvent(name: "batteryStatus", value: "unknown")
 }
 
 def refresh() {
@@ -193,12 +193,12 @@ def powerUnknown(evt) {
     }
 }
 
-def batteryGood(evt) {
+def batteryNormal(evt) {
     def child = childDevice()
     
-    log.info "${child} battery is good!"
-    if (alertBatteryGood) {
-        personToNotify.deviceNotification("${child} battery is good!")
+    log.info "${child} battery is normal!"
+    if (alertBatteryNormal) {
+        personToNotify.deviceNotification("${child} battery is normal!")
     }
 }
 
@@ -242,7 +242,7 @@ def shutdown(evt) {
     }
     
     child.sendEvent(name: "powerSource", value: "unknown")
-    child.sendEvent(name: "battery", value: "unknown")
+    child.sendEvent(name: "batteryStatus", value: "unknown")
 }
 
 def getLoginCookie() {
@@ -298,12 +298,12 @@ def urlHandler_status() {
     } else if (params.status == "battery") {
         child.sendEvent(name: "powerSource", value: "battery")
     } else if (params.status == "low") {
-        child.sendEvent(name: "battery", value: "low")
+        child.sendEvent(name: "batteryStatus", value: "low")
     } else if (params.status == "replace") {
-        child.sendEvent(name: "battery", value: "replace")
+        child.sendEvent(name: "batteryStatus", value: "replace")
     } else if (params.status == "unknown") {
         child.sendEvent(name: "powerSource", value: "unknown")
-        child.sendEvent(name: "battery", value: "unknown")
+        child.sendEvent(name: "batteryStatus", value: "unknown")
     } else if (params.status == "shutdown") {
         child.sendEvent(name: "shutdown", value: "active") 
     } else {
